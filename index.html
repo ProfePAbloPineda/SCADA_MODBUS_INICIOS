@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo Modbus, OPC Server e InfeLink - Presentación de Clase (Versión 2)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 40px;
+            background: white;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 20px;
+        }
+        
+        h2 {
+            color: #2980b9;
+            font-size: 2em;
+            margin: 30px 0 20px 0;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            color: #16a085;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+        }
+        
+        h4 {
+            color: #8e44ad;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .content {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .definition {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .example {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #ff9800;
+        }
+        
+        .procedure {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #4caf50;
+        }
+        
+        .warning {
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #f44336;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        
+        tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .code {
+            background: #263238;
+            color: #aed581;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .image-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            border: 2px dashed #bdbdbd;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .image-caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #616161;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin: 10px 0;
+        }
+        
+        .highlight {
+            background: #ffeb3b;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.5em; }
+            
+            .slide {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+        
+        .step-box {
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #3498db;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .toc {
+            background: #ecf0f1;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .toc li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .toc a:hover {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <!-- Slide 1: Portada -->
+    <div class="slide active" id="slide-1">
+        <h1>Protocolo Modbus, OPC Server e InfeLink</h1>
+        <div class="content" style="text-align: center; padding: 50px;">
+            <h2 style="border: none; text-align: center;">Comunicación Industrial y SCADA</h2>
+            <div class="image-container">
+                <img src="1.png" alt="Diagrama de arquitectura industrial" width="600" height="400">
+                <div class="image-caption">Figura 1: Arquitectura de comunicación industrial</div>
+            </div>
+            <div class="toc">
+                <h3>Contenido del Curso:</h3>
+                <ul>
+                    <li><strong>1.</strong> Protocolo Modbus - Definición, Datagramas ASCII y RTU, RS485 y TCP/IP</li>
+                    <li><strong>2.</strong> Servidor OPC y KepServerEX - Configuración de canales, dispositivos y tags</li>
+                    <li><strong>3.</strong> Software InfeLink - Creación de interfaces HMI y animaciones</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Introducción a Modbus -->
+    <div class="slide" id="slide-2">
+        <h1>1. Protocolo Modbus</h1>
+        
+        <div class="definition">
+            <h3>Definición:</h3>
+            <p>Modbus es un <span class="highlight">protocolo de comunicación serial</span> desarrollado por Modicon (ahora Schneider Electric) en 1979 para su uso con controladores lógicos programables (PLCs). Se ha convertido en el protocolo <strong>estándar de facto</strong> en la industria para la comunicación entre dispositivos electrónicos.</p>
+        </div>
+
+        <div class="content">
+            <h3>Características Principales:</h3>
+            <ul>
+                <li><strong>Arquitectura Maestro/Esclavo:</strong> Un dispositivo maestro inicia todas las transacciones y los dispositivos esclavos responden</li>
+                <li><strong>Protocolo abierto:</strong> Es un protocolo libre de regalías y ampliamente documentado</li>
+                <li><strong>Simple y robusto:</strong> Fácil de implementar y muy confiable en entornos industriales</li>
+                <li><strong>Múltiples variantes:</strong> Modbus RTU, Modbus ASCII, Modbus TCP/IP</li>
+            </ul>
+        </div>
+
+        <div class="image-container">
+            <img src="2.png" alt="Arquitectura Maestro-Esclavo Modbus" width="600" height="400">
+            <div class="image-caption">Figura 2: Arquitectura Maestro-Esclavo del protocolo Modbus</div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Aplicación:</h4>
+            <p>En una planta de tratamiento de agua, un PLC maestro (Modbus Master) puede leer datos de múltiples dispositivos esclavos:</p>
+            <ul>
+                <li>Sensor de flujo (Dirección 1)</li>
+                <li>Medidor de pH (Dirección 2)</li>
+                <li>Válvula de control (Dirección 3)</li>
+                <li>Bomba variable (Dirección 4)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 3: Modbus ASCII -->
+    <div class="slide" id="slide-3">
+        <h1>1.1 Datagrama Modbus ASCII</h1>
+        
+        <div class="definition">
+            <h3>Modbus ASCII:</h3>
+            <p>En el modo ASCII, los mensajes se transmiten como <span class="highlight">caracteres ASCII legibles</span>. Cada byte de información se envía como dos caracteres ASCII hexadecimales. Es más lento que RTU pero más fácil de depurar.</p>
+        </div>
+
+        <div class="content">
+            <h3>Estructura del Frame ASCII:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Tamaño</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Start</strong></td>
+                        <td>1 caracter</td>
+                        <td>Dos puntos (:)</td>
+                        <td>3A (hex)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Address</strong></td>
+                        <td>2 caracteres</td>
+                        <td>Dirección del esclavo (00-FF)</td>
+                        <td>01</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Function</strong></td>
+                        <td>2 caracteres</td>
+                        <td>Código de función</td>
+                        <td>03 (Leer registros)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data</strong></td>
+                        <td>N caracteres</td>
+                        <td>Datos de la solicitud</td>
+                        <td>006B0003</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LRC</strong></td>
+                        <td>2 caracteres</td>
+                        <td>Longituditudinal Redundancy Check</td>
+                        <td>8E</td>
+                    </tr>
+                    <tr>
+                        <td><strong>End</strong></td>
+                        <td>2 caracteres</td>
+                        <td>CR LF (0D 0A)</td>
+                        <td>0D 0A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo Práctico - Lectura de Registros:</h4>
+            <div class="code">
+Mensaje de solicitud (Master → Slave):
+:01 03 00 6B 00 03 8E [CR][LF]
+
+Desglose:
+:        = Inicio de mensaje ASCII
+01       = Dirección del esclavo (1)
+03       = Función 03 (Leer registros de holding)
+00 6B    = Dirección inicial del registro (107 en decimal)
+00 03    = Cantidad de registros a leer (3 registros)
+8E       = LRC (checksum)
+[CR][LF] = Fin del mensaje
+
+Respuesta del esclavo:
+:01 03 06 02 2B 00 00 00 64 F9 [CR][LF]
+
+Desglose:
+:        = Inicio
+01       = Dirección del esclavo
+03       = Función
+06       = Número de bytes de datos (6 bytes = 3 registros × 2 bytes)
+02 2B    = Valor del registro 107 (555 en decimal)
+00 00    = Valor del registro 108 (0)
+00 64    = Valor del registro 109 (100 en decimal)
+F9       = LRC
+[CR][LF] = Fin del mensaje
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="3.png" alt="Estructura frame Modbus ASCII" width="600" height="400">
+            <div class="image-caption">Figura 3: Estructura detallada de un frame Modbus ASCII</div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Modbus RTU -->
+    <div class="slide" id="slide-4">
+        <h1>1.2 Datagrama Modbus RTU</h1>
+        
+        <div class="definition">
+            <h3>Modbus RTU (Remote Terminal Unit):</h3>
+            <p>El modo RTU transmite datos en formato <span class="highlight">binario compacto</span>. Es el modo más eficiente y comúnmente utilizado en aplicaciones industriales. Cada byte se transmite como 8 bits, logrando mayor velocidad que ASCII.</p>
+        </div>
+
+        <div class="content">
+            <h3>Estructura del Frame RTU:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Tamaño</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo (Hex)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Address</strong></td>
+                        <td>1 byte</td>
+                        <td>Dirección del esclavo (0-247)</td>
+                        <td>01</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Function Code</strong></td>
+                        <td>1 byte</td>
+                        <td>Código de función (1-255)</td>
+                        <td>03</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data</strong></td>
+                        <td>N bytes</td>
+                        <td>Datos de la solicitud/respuesta</td>
+                        <td>00 6B 00 03</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CRC</strong></td>
+                        <td>2 bytes</td>
+                        <td>Cyclic Redundancy Check (16 bits)</td>
+                        <td>78 52</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo Práctico - Escritura de Registro:</h4>
+            <div class="code">
+Solicitud de escritura de un solo registro (Función 06):
+[01] [06] [00 01] [FF FF] [98 4A]
+ |    |    |       |        |
+ |    |    |       |        └─ CRC16
+ |    |    |       └────────── Valor a escribir (65535)
+ |    |    └────────────────── Dirección del registro (1)
+ |    └─────────────────────── Función 06 (Preset Single Register)
+ └──────────────────────────── Dirección del esclavo (1)
+
+Respuesta del esclavo (eco de la solicitud):
+[01] [06] [00 01] [FF FF] [98 4A]
+
+Solicitud de lectura múltiple (Función 03):
+[01] [03] [00 00] [00 0A] [C4 0B]
+ |    |    |       |        |
+ |    |    |       |        └─ CRC16
+ |    |    |       └────────── Cantidad de registros (10)
+ |    |    └────────────────── Dirección inicial (0)
+ |    └─────────────────────── Función 03 (Read Holding Registers)
+ └──────────────────────────── Dirección del esclavo (1)
+
+Respuesta:
+[01] [03] [14] [00 01] [00 02] [00 03]...[CRC]
+            |    └──────────────────────┘
+            └─ 20 bytes de datos (10 registros × 2 bytes)
+            </div>
+        </div>
+
+        <div class="content">
+            <h3>Cálculo del CRC16:</h3>
+            <p>El CRC (Cyclic Redundancy Check) es un código de detección de errores de 16 bits. Se calcula sobre todos los bytes del mensaje excepto el propio CRC.</p>
+            <div class="procedure">
+                <h4>Algoritmo CRC16 Modbus:</h4>
+                <ol>
+                    <li>Inicializar registro CRC en 0xFFFF</li>
+                    <li>Para cada byte del mensaje:
+                        <ul>
+                            <li>XOR el byte con el byte bajo del CRC</li>
+                            <li>Realizar 8 desplazamientos a la derecha</li>
+                            <li>Si el bit desplazado es 1, XOR con 0xA001</li>
+                        </ul>
+                    </li>
+                    <li>El resultado final es el CRC (byte bajo primero, luego byte alto)</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="4.png" alt="Comparación ASCII vs RTU" width="600" height="400">
+            <div class="image-caption">Figura 4: Comparación de eficiencia entre Modbus ASCII y RTU</div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Códigos de Función Modbus -->
+    <div class="slide" id="slide-5">
+        <h1>1.3 Códigos de Función Modbus</h1>
+        
+        <div class="content">
+            <h3>Funciones Principales:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo de Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>01</strong></td>
+                        <td>Read Coils</td>
+                        <td>Leer bobinas (discretas de salida)</td>
+                        <td>Leer estado de relés</td>
+                    </tr>
+                    <tr>
+                        <td><strong>02</strong></td>
+                        <td>Read Discrete Inputs</td>
+                        <td>Leer entradas discretas</td>
+                        <td>Leer sensores digitales</td>
+                    </tr>
+                    <tr>
+                        <td><strong>03</strong></td>
+                        <td>Read Holding Registers</td>
+                        <td>Leer registros de retención (16-bit)</td>
+                        <td>Leer valores analógicos, setpoints</td>
+                    </tr>
+                    <tr>
+                        <td><strong>04</strong></td>
+                        <td>Read Input Registers</td>
+                        <td>Leer registros de entrada</td>
+                        <td>Leer mediciones de sensores</td>
+                    </tr>
+                    <tr>
+                        <td><strong>05</strong></td>
+                        <td>Write Single Coil</td>
+                        <td>Escribir una bobina individual</td>
+                        <td>Activar/desactivar un relé</td>
+                    </tr>
+                    <tr>
+                        <td><strong>06</strong></td>
+                        <td>Write Single Register</td>
+                        <td>Escribir un registro individual</td>
+                        <td>Modificar un setpoint</td>
+                    </tr>
+                    <tr>
+                        <td><strong>15</strong></td>
+                        <td>Write Multiple Coils</td>
+                        <td>Escribir múltiples bobinas</td>
+                        <td>Controlar varias salidas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>16</strong></td>
+                        <td>Write Multiple Registers</td>
+                        <td>Escribir múltiples registros</td>
+                        <td>Configurar varios parámetros</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo Detallado - Función 03 (Lectura):</h4>
+            <div class="code">
+Solicitud: Leer 5 registros comenzando desde la dirección 100
+Dirección del esclavo: 0x01
+Función: 0x03
+Dirección inicial: 0x0064 (100 en decimal)
+Cantidad de registros: 0x0005
+
+Frame completo (hex): 01 03 00 64 00 05 C5 38
+                                    └─────┘ CRC16
+
+Respuesta esperada:
+01 03 0A [00 01] [00 02] [00 03] [00 04] [00 05] CRC
+         └──────────────────────────────────────┘
+         10 bytes de datos (5 registros × 2 bytes)
+
+Valores leídos:
+Registro 100 = 0x0001 (1)
+Registro 101 = 0x0002 (2)
+Registro 102 = 0x0003 (3)
+Registro 103 = 0x0004 (4)
+Registro 104 = 0x0005 (5)
+            </div>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Códigos de Error:</h4>
+            <p>Si un esclavo no puede procesar una solicitud, responde con el <strong>código de función + 0x80</strong> y un código de excepción:</p>
+            <ul>
+                <li><strong>01:</strong> Función ilegal</li>
+                <li><strong>02:</strong> Dirección de datos ilegal</li>
+                <li><strong>03:</strong> Valor ilegal</li>
+                <li><strong>04:</strong> Error de esclavo</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 6: Modbus sobre RS485 -->
+    <div class="slide" id="slide-6">
+        <h1>1.4 Modbus sobre RS485</h1>
+        
+        <div class="definition">
+            <h3>RS485 (Recommended Standard 485):</h3>
+            <p>RS485 es un <span class="highlight">estándar de capa física</span> que define las características eléctricas de drivers y receptores para comunicaciones seriales balanceadas. Es la interfaz física más común para Modbus RTU/ASCII.</p>
+        </div>
+
+        <div class="content">
+            <h3>Características de RS485:</h3>
+            <ul>
+                <li><strong>Comunicación diferencial:</strong> Usa dos cables (A y B) para transmitir datos, proporcionando alta inmunidad al ruido</li>
+                <li><strong>Multipunto:</strong> Permite conectar hasta <span class="highlight">32 dispositivos</span> (puede extenderse con repetidores)</li>
+                <li><strong>Distancia:</strong> Hasta <strong>1200 metros</strong> a 100 kbps</li>
+                <li><strong>Velocidad:</strong> Desde 1200 bps hasta 10 Mbps (dependiendo de la distancia)</li>
+                <li><strong>Half-duplex:</strong> Los dispositivos transmiten o reciben, pero no simultáneamente</li>
+            </ul>
+        </div>
+
+        <div class="image-container">
+            <img src="5.png" alt="Topología de red RS485" width="600" height="400">
+            <div class="image-caption">Figura 5: Topología de red Modbus RS485 con múltiples esclavos</div>
+        </div>
+
+        <div class="procedure">
+            <h3>Configuración Típica RS485:</h3>
+            <div class="two-columns">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <h4>Cableado:</h4>
+                    <ul>
+                        <li>Cable par trenzado blindado</li>
+                        <li>Conexión: A (+) y B (-)</li>
+                        <li>Blindaje conectado a tierra en un solo punto</li>
+                        <li>Topología en bus lineal (no estrella)</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <h4>Terminación:</h4>
+                    <ul>
+                        <li>Resistencia de 120Ω en ambos extremos del bus</li>
+                        <li>Evitar reflexiones de señal</li>
+                        <li>Necesaria en distancias > 1 metro</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Configuración de Parámetros:</h4>
+            <div class="code">
+Parámetros de comunicación típicos para Modbus RTU/ASCII/RS485:
+
+Baud Rate:     9600, 19200, 38400, 57600, 115200 bps
+Data Bits:     8 bits
+Parity:        None, Even, Odd
+Stop Bits:     1 o 2 bits
+Flow Control:  Ninguno (típicamente)
+
+Configuración más común: 9600-8-N-1
+(9600 bps, 8 bits de datos, sin paridad, 1 bit de parada)
+
+Tiempos de silencio (Inter-frame gap):
+- Entre caracteres: 1.5 caracteres (mínimo)
+- Entre mensajes: 3.5 caracteres (mínimo)
+
+A 9600 bps:
+- 1 bit = 104.17 μs
+- 3.5 caracteres = 3.5 × 11 bits × 104.17 μs = 4.01 ms
+            </div>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Consideraciones Importantes:</h4>
+            <ul>
+                <li><strong>Direcciones únicas:</strong> Cada esclavo debe tener una dirección única (1-247)</li>
+                <li><strong>Polaridad:</strong> Verificar la conexión correcta de A y B</li>
+                <li><strong>Tierra común:</strong> Conectar tierras de referencia entre dispositivos</li>
+                <li><strong>Impedancia:</strong> No exceder la capacidad de carga del bus</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 7: Modbus TCP/IP -->
+    <div class="slide" id="slide-7">
+        <h1>1.5 Modbus TCP/IP sobre Ethernet</h1>
+        
+        <div class="definition">
+            <h3>Modbus TCP/IP:</h3>
+            <p>Modbus TCP es la adaptación del protocolo Modbus para redes <span class="highlight">Ethernet TCP/IP</span>. Elimina el CRC (usando el checksum de TCP) y agrega un encabezado MBAP (Modbus Application Protocol) de 7 bytes.</p>
+        </div>
+
+        <div class="content">
+            <h3>Ventajas de Modbus TCP:</h3>
+            <ul>
+                <li><strong>Alta velocidad:</strong> 10/100/1000 Mbps vs. máximo 10 Mbps de RS485</li>
+                <li><strong>Distancia ilimitada:</strong> Usa infraestructura de red existente (LAN, WAN, Internet)</li>
+                <li><strong>Más dispositivos:</strong> Sin límite práctico de nodos</li>
+                <li><strong>Routing:</strong> Puede atravesar routers y firewalls</li>
+                <li><strong>Estándar:</strong> Usa hardware Ethernet comercial económico</li>
+            </ul>
+
+            <h3>Estructura del Frame Modbus TCP:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campo MBAP</th>
+                        <th>Tamaño</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Transaction ID</strong></td>
+                        <td>2 bytes</td>
+                        <td>Identificador de transacción (para emparejar request/response)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Protocol ID</strong></td>
+                        <td>2 bytes</td>
+                        <td>Identificador de protocolo (0 = Modbus)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Length</strong></td>
+                        <td>2 bytes</td>
+                        <td>Longitud del mensaje restante (bytes siguientes)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Unit ID</strong></td>
+                        <td>1 byte</td>
+                        <td>Dirección del esclavo (similar a Modbus serial)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Function Code + Data</strong></td>
+                        <td>N bytes</td>
+                        <td>PDU Modbus estándar (sin CRC)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Comunicación Modbus TCP:</h4>
+            <div class="code">
+Solicitud TCP (Master → Slave, puerto 502):
+
+Encabezado MBAP:
+Transaction ID:  00 01  (Identificador de transacción 1)
+Protocol ID:     00 00  (Modbus)
+Length:          00 06  (6 bytes siguen)
+Unit ID:         01     (Esclavo 1)
+
+PDU Modbus:
+Function Code:   03     (Read Holding Registers)
+Start Address:   00 64  (Registro 100)
+Quantity:        00 0A  (10 registros)
+
+Frame completo (hex):
+00 01 00 00 00 06 01 03 00 64 00 0A
+
+Respuesta del esclavo:
+00 01 00 00 00 17 01 03 14 [datos...]
+            └─────
+            23 bytes siguen (1 byte Unit ID + 1 byte byte count + 20 bytes de datos)
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="6.png" alt="Arquitectura Modbus TCP/IP" width="600" height="400">
+            <div class="image-caption">Figura 6: Arquitectura de red Modbus TCP/IP con switch Ethernet</div>
+        </div>
+
+        <div class="content">
+            <h3>Comparación: Modbus RTU vs Modbus TCP</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>Modbus RTU (RS485)</th>
+                        <th>Modbus TCP/IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Medio físico</td>
+                        <td>Cable par trenzado</td>
+                        <td>Ethernet (CAT5/6, fibra)</td>
+                    </tr>
+                    <tr>
+                        <td>Velocidad máxima</td>
+                        <td>~10 Mbps</td>
+                        <td>10/100/1000 Mbps</td>
+                    </tr>
+                    <tr>
+                        <td>Distancia</td>
+                        <td>1200 m</td>
+                        <td>Ilimitada (vía routers)</td>
+                    </tr>
+                    <tr>
+                        <td>Nodos máximos</td>
+                        <td>32 (sin repetidores)</td>
+                        <td>Sin límite práctico</td>
+                    </tr>
+                    <tr>
+                        <td>Detección de errores</td>
+                        <td>CRC16</td>
+                        <td>TCP checksum</td>
+                    </tr>
+                    <tr>
+                        <td>Puerto</td>
+                        <td>N/A</td>
+                        <td>502 (TCP)</td>
+                    </tr>
+                    <tr>
+                        <td>Costo</td>
+                        <td>Bajo</td>
+                        <td>Medio (requiere switches)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Slide 8: Introducción a OPC Server -->
+    <div class="slide" id="slide-8">
+        <h1>2. Servidor OPC - Concepto General</h1>
+        
+        <div class="definition">
+            <h3>¿Qué es OPC?</h3>
+            <p><span class="highlight">OPC (OLE for Process Control)</span> es un estándar de interoperabilidad industrial que permite la comunicación entre dispositivos de hardware de diferentes fabricantes y aplicaciones de software (HMI, SCADA, MES, ERP). Actualmente evolucionó a <strong>OPC UA (Unified Architecture)</strong>.</p>
+        </div>
+
+        <div class="content">
+            <h3>Problema que resuelve OPC:</h3>
+            <div class="image-container">
+                <img src="7.png" alt="Arquitectura OPC Server" width="600" height="400">
+                <div class="image-caption">Figura 7: Arquitectura cliente-servidor OPC</div>
+            </div>
+
+            <h4>Sin OPC (Problema):</h4>
+            <ul>
+                <li>Cada aplicación necesita un driver específico para cada dispositivo</li>
+                <li>N×M conexiones diferentes (N aplicaciones × M dispositivos)</li>
+                <li>Alto costo de desarrollo y mantenimiento</li>
+            </ul>
+
+            <h4>Con OPC (Solución):</h4>
+            <ul>
+                <li>El OPC Server actúa como traductor universal</li>
+                <li>Solo se necesita 1 driver por dispositivo (en el servidor OPC)</li>
+                <li>Las aplicaciones se conectan al servidor OPC usando un estándar común</li>
+                <li>N + M conexiones totales</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <h3>Componentes de OPC:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Función</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>OPC Server</strong></td>
+                        <td>Traduce el protocolo del dispositivo a formato OPC estándar</td>
+                        <td>KepServerEX, Matrikon, Prosys</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPC Client</strong></td>
+                        <td>Aplicación que consume datos del servidor OPC</td>
+                        <td>InfeLink, WinCC, Ignition, Excel</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPC DA</strong></td>
+                        <td>Data Access - Acceso a datos en tiempo real</td>
+                        <td>Lectura/escritura de tags</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPC HDA</strong></td>
+                        <td>Historical Data Access - Datos históricos</td>
+                        <td>Tendencias, reportes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPC UA</strong></td>
+                        <td>Unified Architecture - Versión moderna multiplataforma</td>
+                        <td>Seguridad, IoT, Cloud</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Aplicación:</h4>
+            <p>En una planta industrial con:</p>
+            <ul>
+                <li>PLC Delta (Modbus RTU)</li>
+                <li>PLC Siemens (Profibus)</li>
+                <li>Controlador Mitsubishi (Ethernet)</li>
+                <li>SCADA InfeLink</li>
+                <li>Sistema MES</li>
+            </ul>
+            <p><strong>Sin OPC:</strong> InfeLink necesita 3 drivers diferentes, el MES necesita 3 drivers diferentes = 6 drivers</p>
+            <p><strong>Con OPC:</strong> 1 servidor OPC con 3 drivers, InfeLink y MES se conectan al servidor OPC = 3 drivers + 2 clientes OPC</p>
+        </div>
+    </div>
+
+    <!-- Slide 9: KepServerEX -->
+    <div class="slide" id="slide-9">
+        <h1>2.1 KepServerEX - Software OPC Server</h1>
+        
+        <div class="definition">
+            <h3>KepServerEX:</h3>
+            <p>Es el <span class="highlight">servidor OPC líder en la industria</span> desarrollado por Kepware (ahora parte de PTC). Proporciona conectividad a más de 150 protocolos industriales diferentes, incluyendo Modbus, Siemens, Allen-Bradley, OPC UA, MQTT, y muchos más.</p>
+        </div>
+
+        <div class="content">
+            <h3>Características Principales:</h3>
+            <ul>
+                <li><strong>Múltiples protocolos:</strong> Soporta más de 150 drivers de comunicación</li>
+                <li><strong>Escalabilidad:</strong> Desde pequeñas aplicaciones hasta miles de tags</li>
+                <li><strong>Confiabilidad:</strong> Reconexión automática, buffering de datos</li>
+                <li><strong>Seguridad:</strong> Autenticación, encriptación, control de acceso</li>
+                <li><strong>Fácil configuración:</strong> Interfaz gráfica intuitiva</li>
+                <li><strong>API de configuración:</strong> Automatización vía REST API</li>
+            </ul>
+        </div>
+
+        <div class="image-container">
+            <img src="8.png" alt="Interfaz KepServerEX" width="600" height="400">
+            <div class="image-caption">Figura 8: Interfaz principal de KEPServerEX Configuration</div>
+        </div>
+
+        <div class="procedure">
+            <h3>Jerarquía de Configuración en KepServer:</h3>
+            <div class="content">
+                <ol>
+                    <li><strong>Channel (Canal):</strong> Define el medio de comunicación (puerto serial, Ethernet, etc.)
+                        <ul>
+                            <li>Ejemplo: "Modbus_ASCII_Channel" - Puerto COM1, 9600 baud</li>
+                        </ul>
+                    </li>
+                    <li><strong>Device (Dispositivo):</strong> Representa un dispositivo físico en el canal
+                        <ul>
+                            <li>Ejemplo: "PLC_Delta_01" - Dirección Modbus 1</li>
+                        </ul>
+                    </li>
+                    <li><strong>Tag (Etiqueta):</strong> Variable individual dentro del dispositivo
+                        <ul>
+                            <li>Ejemplo: "Temperatura_Tanque1" - Registro 40001</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Creación de Canal Serial (Modificado a ASCII) -->
+    <div class="slide" id="slide-10">
+        <h1>2.2 Creación de Canal en Comunicación Serial (Modbus ASCII)</h1>
+        
+        <div class="procedure">
+            <h3>Procedimiento Paso a Paso:</h3>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Abrir KEPServerEX Configuration</h4>
+                <ul>
+                    <li>Ejecutar "KEPServerEX Configuration" desde el menú Inicio</li>
+                    <li>Si es la primera vez, se abrirá el asistente de configuración</li>
+                    <li>O hacer clic derecho en "Project" → "New" → "Channel"</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Seleccionar Driver</h4>
+                <ul>
+                    <li>En la ventana "Channel Properties", hacer clic en "Driver"</li>
+                    <li>Buscar y seleccionar: <strong>"Modbus ASCII Serial"</strong></li>
+                    <li>Hacer clic en "Next"</li>
+                </ul>
+                <div class="image-container">
+                    <img src="9.png" alt="Selección driver Modbus ASCII" width="600" height="400">
+                    <div class="image-caption">Figura 9: Selección del driver Modbus ASCII Serial</div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Configurar Parámetros del Canal</h4>
+                <div class="content">
+                    <p><strong>Channel Properties:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Valor Típico</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Name</strong></td>
+                                <td>Modbus_ASCII_RS485</td>
+                                <td>Nombre descriptivo del canal</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Diagnostics</strong></td>
+                                <td>Enable</td>
+                                <td>Habilitar diagnósticos para troubleshooting</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Serial Port</strong></td>
+                                <td>COM1</td>
+                                <td>Puerto serial físico o virtual</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Baud Rate</strong></td>
+                                <td>9600</td>
+                                <td>Velocidad de comunicación (debe coincidir con dispositivos)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Bits</strong></td>
+                                <td>7 u 8</td>
+                                <td>Bits de datos (ASCII a veces usa 7, pero 8 es común)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Parity</strong></td>
+                                <td>Even</td>
+                                <td>Paridad: Even es común en ASCII, pero depende del dispositivo</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stop Bits</strong></td>
+                                <td>1 o 2</td>
+                                <td>Bits de parada</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Flow Control</strong></td>
+                                <td>None</td>
+                                <td>Control de flujo (típicamente None para RS485)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Response Timeout</strong></td>
+                                <td>1000 ms</td>
+                                <td>Tiempo máximo de espera por respuesta</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Inter-Frame Delay</strong></td>
+                                <td>50 ms</td>
+                                <td>Retraso entre frames</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <h4>Configuración Avanzada (Opcional)</h4>
+                <div class="content">
+                    <ul>
+                        <li><strong>Virtual Network:</strong> Dejar en "None" para configuración básica</li>
+                        <li><strong>Write Optimizations:</strong> 
+                            <ul>
+                                <li>"Write all values for all tags" - Escribe todos los valores</li>
+                                <li>"Write only the most current value for each tag" - Optimizado (recomendado)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Non-Normalized Device Addresses:</strong> Habilitar si se usan direcciones en formato hexadecimal</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">5</div>
+                <h4>Finalizar Configuración</h4>
+                <ul>
+                    <li>Hacer clic en "Finish" o "OK"</li>
+                    <li>El canal aparecerá en el árbol del proyecto</li>
+                    <li>Verificar que el estado sea "Connected" (verde)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Configuración Completa (ASCII):</h4>
+            <div class="code">
+Canal: Modbus_ASCII_Principal
+├─ Driver: Modbus ASCII Serial
+├─ Puerto: COM3
+├─ Baud Rate: 9600
+├─ Data Bits: 7
+├─ Parity: Even
+├─ Stop Bits: 1
+├─ Flow Control: None
+├─ Response Timeout: 1000 ms
+├─ Inter-Frame Delay: 50 ms
+├─ Retry Attempts: 3
+└─ Diagnostics: Enabled
+
+Estado: ✓ Connected
+Comunicación: OK (Formato ASCII con LRC)
+            </div>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Verificaciones Importantes:</h4>
+            <ul>
+                <li>Verificar que el puerto COM no esté siendo usado por otra aplicación</li>
+                <li>Confirmar que los parámetros seriales coincidan con los dispositivos (especialmente Paridad en ASCII)</li>
+                <li>Para USB-RS485, instalar drivers correctos y verificar el número de puerto COM</li>
+                <li>Verificar cableado y terminación RS485</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 11: Creación de Dispositivo -->
+    <div class="slide" id="slide-11">
+        <h1>2.3 Creación de Dispositivo en Comunicación Serial</h1>
+        
+        <div class="procedure">
+            <h3>Procedimiento Detallado:</h3>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Agregar Nuevo Dispositivo</h4>
+                <ul>
+                    <li>En el árbol del proyecto, hacer clic derecho sobre el canal creado</li>
+                    <li>Seleccionar "New" → "Device"</li>
+                    <li>O usar el botón "Add Device" en la barra de herramientas</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Configurar Propiedades del Dispositivo</h4>
+                <div class="content">
+                    <p><strong>Device Properties:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Valor</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Name</strong></td>
+                                <td>PLC_Delta_01</td>
+                                <td>Nombre identificador del dispositivo</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ID</strong></td>
+                                <td>1</td>
+                                <td>Dirección Modbus del esclavo (1-247)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Model</strong></td>
+                                <td>Modbus</td>
+                                <td>Modelo del dispositivo (genérico o específico)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Driver</strong></td>
+                                <td>Modbus ASCII</td>
+                                <td>Heredado del canal</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Configuración Específica Modbus</h4>
+                <div class="content">
+                    <ul>
+                        <li><strong>Frame Type:</strong> ASCII (seleccionado en el canal)</li>
+                        <li><strong>Byte Order:</strong> 
+                            <ul>
+                                <li>"AB CD" - Big Endian (más común en Modbus)</li>
+                                <li>"CD AB" - Little Endian</li>
+                                <li>"BA DC" - Byte swap</li>
+                                <li>"DC BA" - Byte and word swap</li>
+                            </ul>
+                        </li>
+                        <li><strong>Register Addressing:</strong>
+                            <ul>
+                                <li>"0-based" - Dirección base 0 (0-65535)</li>
+                                <li>"1-based" - Dirección base 1 (1-65536)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <h4>Parámetros de Comunicación</h4>
+                <div class="content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Valor Recomendado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Connect/Disconnect on Demand</strong></td>
+                                <td>No (mantener conexión permanente)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scan on Demand</strong></td>
+                                <td>No (scan continuo)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scan Mode</strong></td>
+                                <td>"Read all values on demand" o "Respect tag-specified scan rate"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Request Timeout</strong></td>
+                                <td>1000 ms</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Failover Timeout</strong></td>
+                                <td>3000 ms</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Retries</strong></td>
+                                <td>3 intentos</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">5</div>
+                <h4>Configuración de Tags Dinámicos (Opcional)</h4>
+                <div class="content">
+                    <p>Para dispositivos que soportan auto-descubrimiento:</p>
+                    <ul>
+                        <li>Habilitar "Dynamic Tags"</li>
+                        <li>Configurar rango de direcciones a escanear</li>
+                        <li>Especificar tipo de datos esperado</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">6</div>
+                <h4>Verificar Conexión</h4>
+                <ul>
+                    <li>Hacer clic en "OK" para guardar</li>
+                    <li>El dispositivo aparecerá bajo el canal en el árbol</li>
+                    <li>El icono debe mostrarse en <strong>verde</strong> (Connected)</li>
+                    <li>Si está en rojo, verificar:
+                        <ul>
+                            <li>Dirección del esclavo</li>
+                            <li>Cableado RS485</li>
+                            <li>Parámetros de comunicación (Paridad/Stop bits)</li>
+                            <li>Energización del dispositivo</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="10.png" alt="Configuración de dispositivo" width="600" height="400">
+            <div class="image-caption">Figura 10: Ventana de configuración de propiedades del dispositivo</div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo - Múltiples Dispositivos:</h4>
+            <div class="code">
+Canal: Modbus_ASCII_RS485
+│
+├─ Device: PLC_Delta_Tanque1
+│  └─ ID: 1
+│
+├─ Device: PLC_Delta_Tanque2
+│  └─ ID: 2
+│
+├─ Device: Medidor_Flujo
+│  └─ ID: 3
+│
+├─ Device: Variador_Bomba
+│  └─ ID: 4
+│
+└─ Device: Controlador_Temperatura
+   └─ ID: 5
+
+Cada dispositivo tiene su propia dirección Modbus única (1-5)
+Todos comparten el mismo canal físico RS485
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Delta PLC - Mapeo de Direcciones -->
+    <div class="slide" id="slide-12">
+        <h1>2.4 Delta PLC - Direcciones Modbus</h1>
+        
+        <div class="definition">
+            <h3>Mapeo de Memoria Delta PLC:</h3>
+            <p>Los PLCs Delta DVP series usan un sistema de direccionamiento específico que debe mapearse a direcciones Modbus estándar. Cada tipo de memoria (bobinas, registros) tiene un rango y dirección Modbus correspondiente.</p>
+        </div>
+
+        <div class="content">
+            <h3>Tabla de Direcciones Modbus para Delta DVP:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dispositivo</th>
+                        <th>Rango Delta</th>
+                        <th>Tipo</th>
+                        <th>Dirección Hex</th>
+                        <th>Dirección Modbus (Dec)</th>
+                        <th>Función Modbus</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>X</strong> (Entradas)</td>
+                        <td>X0-X377</td>
+                        <td>Bit</td>
+                        <td>0000-00FF</td>
+                        <td>1-256</td>
+                        <td>02 (Read Discrete Inputs)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Y</strong> (Salidas)</td>
+                        <td>Y0-Y377</td>
+                        <td>Bit</td>
+                        <td>0100-01FF</td>
+                        <td>1-256</td>
+                        <td>01 (Read Coils)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>M</strong> (Auxiliares)</td>
+                        <td>M0-M4095</td>
+                        <td>Bit</td>
+                        <td>0200-0FFF</td>
+                        <td>1-4096</td>
+                        <td>01 (Read Coils)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>S</strong> (Pasos)</td>
+                        <td>S0-S1023</td>
+                        <td>Bit</td>
+                        <td>0000-03FF</td>
+                        <td>1-1024</td>
+                        <td>01/02 (Read Coils/Inputs)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D</strong> (Datos)</td>
+                        <td>D0-D9999</td>
+                        <td>Word (16-bit)</td>
+                        <td>1000-3FFF</td>
+                        <td>40001-410000</td>
+                        <td>03/04 (Read Registers)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T</strong> (Temporizadores)</td>
+                        <td>T0-T255</td>
+                        <td>Word</td>
+                        <td>0400-04FF</td>
+                        <td>40001-400256</td>
+                        <td>03 (Read Holding Registers)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>C</strong> (Contadores)</td>
+                        <td>C0-C255</td>
+                        <td>Word</td>
+                        <td>0500-05FF</td>
+                        <td>40001-400256</td>
+                        <td>03 (Read Holding Registers)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplos Prácticos de Direccionamiento:</h4>
+            <div class="content">
+                <h5>Ejemplo 1 - Leer entrada digital X0:</h5>
+                <ul>
+                    <li>Dispositivo: X0</li>
+                    <li>Tipo: Bit de entrada</li>
+                    <li>Dirección Modbus: <strong>1</strong> (o 00001)</li>
+                    <li>Función: <strong>02</strong> (Read Discrete Inputs)</li>
+                    <li>Tag en KepServer: <code>PLC_Delta_01.X0</code></li>
+                </ul>
+
+                <h5>Ejemplo 2 - Escribir salida Y5:</h5>
+                <ul>
+                    <li>Dispositivo: Y5</li>
+                    <li>Tipo: Bobina de salida</li>
+                    <li>Dirección Modbus: <strong>6</strong> (Y0=1, Y1=2, ... Y5=6)</li>
+                    <li>Función: <strong>05</strong> (Write Single Coil)</li>
+                    <li>Tag en KepServer: <code>PLC_Delta_01.Y5</code></li>
+                </ul>
+
+                <h5>Ejemplo 3 - Leer registro D100:</h5>
+                <ul>
+                    <li>Dispositivo: D100</li>
+                    <li>Tipo: Registro de datos (16-bit)</li>
+                    <li>Dirección Modbus: <strong>40101</strong> (D0=40001, D100=40001+100)</li>
+                    <li>Función: <strong>03</strong> (Read Holding Registers)</li>
+                    <li>Tag en KepServer: <code>PLC_Delta_01.D100</code></li>
+                </ul>
+
+                <h5>Ejemplo 4 - Leer valor de temporizador T10:</h5>
+                <ul>
+                    <li>Dispositivo: T10</li>
+                    <li>Tipo: Registro de temporizador</li>
+                    <li>Dirección Modbus: <strong>40011</strong> (T0=40001, T10=40001+10)</li>
+                    <li>Función: <strong>03</strong> (Read Holding Registers)</li>
+                    <li>Tag en KepServer: <code>PLC_Delta_01.T10</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content">
+            <h3>Fórmulas de Conversión:</h3>
+            <div class="code">
+Para registros D (Datos):
+Dirección Modbus = 40001 + Número de registro D
+Ejemplo: D500 → 40001 + 500 = 40501
+
+Para bobinas M (Auxiliares):
+Dirección Modbus = 1 + Número de M
+Ejemplo: M100 → 1 + 100 = 101
+
+Para entradas X:
+Dirección Modbus = 1 + Valor decimal de X
+Ejemplo: X10 → 1 + 8 (X0-X7=0-7, X10=8) = 9
+
+Para salidas Y:
+Dirección Modbus = 1 + Valor decimal de Y
+Ejemplo: Y12 → 1 + 10 = 11
+
+Nota: X e Y usan numeración octal en Delta PLC
+X0-X7, X10-X17, X20-X27... (no existe X8 ni X9)
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="11.png" alt="Tabla mapeo Delta Modbus" width="600" height="400">
+            <div class="image-caption">Figura 11: Tabla completa de mapeo de direcciones Delta a Modbus</div>
+        </div>
+    </div>
+
+    <!-- Slide 13: Creación de Tags -->
+    <div class="slide" id="slide-13">
+        <h1>2.5 Creación de Tags en KepServer</h1>
+        
+        <div class="procedure">
+            <h3>Procedimiento para Crear Tags:</h3>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Acceder al Dispositivo</h4>
+                <ul>
+                    <li>En el árbol del proyecto, expandir el canal</li>
+                    <li>Expandir el dispositivo (ej. "PLC_Delta_01")</li>
+                    <li>Hacer clic derecho sobre "Device" → "New" → "Tag"</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Configurar Propiedades del Tag</h4>
+                <div class="content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Propiedad</th>
+                                <th>Valor</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Name</strong></td>
+                                <td>Temperatura_Tanque1</td>
+                                <td>Nombre descriptivo del tag</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Address</strong></td>
+                                <td>D100</td>
+                                <td>Dirección en formato Delta (o 40101 en Modbus)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Type</strong></td>
+                                <td>Word</td>
+                                <td>Tipo de dato: Boolean, Short, Word, Long, Float, etc.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Access</strong></td>
+                                <td>Read/Write</td>
+                                <td>Solo lectura o lectura/escritura</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scan Rate</strong></td>
+                                <td>1000 ms</td>
+                                <td>Frecuencia de actualización</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Description</strong></td>
+                                <td>Temperatura del tanque 1 en °C</td>
+                                <td>Descripción del propósito del tag</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Configuración Avanzada del Tag</h4>
+                <div class="content">
+                    <h5>Scaling (Escalado):</h5>
+                    <ul>
+                        <li><strong>Raw Low:</strong> 0 (valor mínimo del PLC)</li>
+                        <li><strong>Raw High:</strong> 1000 (valor máximo del PLC)</li>
+                        <li><strong>Scaled Low:</strong> 0.0 (valor en ingeniería mínimo)</li>
+                        <li><strong>Scaled High:</strong> 100.0 (valor en ingeniería máximo)</li>
+                        <li><strong>Formula:</strong> Scaled = (Raw - RawLow) × (ScaledHigh - ScaledLow) / (RawHigh - RawLow) + ScaledLow</li>
+                    </ul>
+
+                    <h5>Alarmas (Opcional):</h5>
+                    <ul>
+                        <li><strong>High Limit:</strong> 80.0 °C</li>
+                        <li><strong>Low Limit:</strong> 10.0 °C</li>
+                        <li><strong>High-High Limit:</strong> 90.0 °C (crítico)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo Completo - Creación de Múltiples Tags:</h4>
+            <div class="code">
+Dispositivo: PLC_Delta_01
+
+Tags de Entradas Digitales:
+├─ Tag: Sensor_Nivel_Alto
+│  ├─ Address: X0
+│  ├─ Data Type: Boolean
+│  └─ Description: Sensor de nivel alto del tanque
+│
+├─ Tag: Sensor_Nivel_Bajo
+│  ├─ Address: X1
+│  ├─ Data Type: Boolean
+│  └─ Description: Sensor de nivel bajo del tanque
+│
+└─ Tag: Bomba_Activa
+   ├─ Address: X2
+   ├─ Data Type: Boolean
+   └─ Description: Feedback de bomba encendida
+
+Tags de Salidas Digitales:
+├─ Tag: Control_Bomba
+│  ├─ Address: Y0
+│  ├─ Data Type: Boolean
+│  ├─ Access: Read/Write
+│  └─ Description: Control de encendido de bomba
+│
+└─ Tag: Alarma_Sonora
+   ├─ Address: Y1
+   ├─ Data Type: Boolean
+   ├─ Access: Read/Write
+   └─ Description: Activación de alarma sonora
+
+Tags de Registros Analógicos:
+├─ Tag: Temperatura_Tanque
+│  ├─ Address: D100
+│  ├─ Data Type: Word
+│  ├─ Scaling: 0-1000 → 0.0-100.0 °C
+│  └─ Description: Temperatura del tanque principal
+│
+├─ Tag: Presion_Sistema
+│  ├─ Address: D101
+│  ├─ Data Type: Word
+│  ├─ Scaling: 0-4095 → 0.0-10.0 bar
+│  └─ Description: Presión del sistema
+│
+├─ Tag: Setpoint_Temperatura
+│  ├─ Address: D200
+│  ├─ Data Type: Word
+│  ├─ Access: Read/Write
+│  ├─ Scaling: 0-1000 → 0.0-100.0 °C
+│  └─ Description: Setpoint de temperatura
+│
+└─ Tag: Flow_Totalizer
+   ├─ Address: D300
+   ├─ Data Type: Long (32-bit)
+   └─ Description: Totalizador de flujo (litros)
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="12.png" alt="Creación de tag en KepServer" width="600" height="400">
+            <div class="image-caption">Figura 12: Ventana de propiedades de tag en KEPServerEX</div>
+        </div>
+
+        <div class="content">
+            <h3>Tipos de Datos Soportados:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo de Dato</th>
+                        <th>Tamaño</th>
+                        <th>Rango</th>
+                        <th>Uso Típico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Boolean</strong></td>
+                        <td>1 bit</td>
+                        <td>0 o 1</td>
+                        <td>Entradas/salidas digitales</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Short</strong></td>
+                        <td>8 bits</td>
+                        <td>-128 a 127</td>
+                        <td>Valores pequeños con signo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Word</strong></td>
+                        <td>16 bits</td>
+                        <td>0 a 65535</td>
+                        <td>Registros analógicos (D)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Long</strong></td>
+                        <td>32 bits</td>
+                        <td>0 a 4294967295</td>
+                        <td>Totalizadores, contadores</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Float</strong></td>
+                        <td>32 bits</td>
+                        <td>±3.4×10^38</td>
+                        <td>Valores decimales (IEEE 754)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BCD</strong></td>
+                        <td>16 bits</td>
+                        <td>0-9999</td>
+                        <td>Display numéricos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Slide 14: Verificación de Tags -->
+    <div class="slide" id="slide-14">
+        <h1>2.6 Verificación del Estado de los Tags</h1>
+        
+        <div class="procedure">
+            <h3>Métodos de Verificación:</h3>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Quick Client de KepServer</h4>
+                <ul>
+                    <li>Herramienta integrada para monitoreo rápido</li>
+                    <li>Acceso: Tools → Quick Client</li>
+                    <li>Permite ver valores en tiempo real</li>
+                    <li>Posibilidad de escribir valores (tags RW)</li>
+                </ul>
+                <div class="image-container">
+                    <img src="13.png" alt="Quick Client KepServer" width="600" height="400">
+                    <div class="image-caption">Figura 13: Quick Client mostrando tags y valores en tiempo real</div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Diagnosticos del Canal/Dispositivo</h4>
+                <div class="content">
+                    <p>Verificar estadísticas de comunicación:</p>
+                    <ul>
+                        <li>Clic derecho en Canal/Dispositivo → "Diagnostics"</li>
+                        <li>Información disponible:
+                            <ul>
+                                <li><strong>Communications:</strong> Bytes enviados/recibidos</li>
+                                <li><strong>Requests:</strong> Solicitudes exitosas/fallidas</li>
+                                <li><strong>Tags:</strong> Tags activos, scan rate</li>
+                                <li><strong>Errors:</strong> Contador de errores, últimos errores</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Event Log (Registro de Eventos)</h4>
+                <div class="content">
+                    <ul>
+                        <li>View → Event Log</li>
+                        <li>Muestra todas las actividades del servidor</li>
+                        <li>Tipos de eventos:
+                            <ul>
+                                <li><strong>Information:</strong> Eventos normales (conexiones, cambios)</li>
+                                <li><strong>Warning:</strong> Advertencias (reintentos, timeouts)</li>
+                                <li><strong>Error:</strong> Errores críticos (falla de comunicación)</li>
+                            </ul>
+                        </li>
+                        <li>Filtrar por canal, dispositivo, severidad</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <h3>Indicadores de Estado:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Icono</th>
+                        <th>Estado</th>
+                        <th>Significado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>🟢</td>
+                        <td><strong>Connected</strong></td>
+                        <td>Comunicación OK</td>
+                        <td>Ninguna - todo normal</td>
+                    </tr>
+                    <tr>
+                        <td>🔴</td>
+                        <td><strong>Disconnected</strong></td>
+                        <td>Sin comunicación</td>
+                        <td>Verificar cableado, energía, configuración</td>
+                    </tr>
+                    <tr>
+                        <td>🟡</td>
+                        <td><strong>Partial</strong></td>
+                        <td>Algunos tags fallan</td>
+                        <td>Verificar direcciones de tags problemáticos</td>
+                    </tr>
+                    <tr>
+                        <td>⚪</td>
+                        <td><strong>Disabled</strong></td>
+                        <td>Canal/dispositivo deshabilitado</td>
+                        <td>Habilitar en propiedades</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Troubleshooting:</h4>
+            <div class="content">
+                <h5>Problema: Tag muestra calidad "Bad" o valor 0</h5>
+                
+                <h6>Verificación paso a paso:</h6>
+                <ol>
+                    <li><strong>Verificar estado del dispositivo:</strong>
+                        <ul>
+                            <li>¿El icono del dispositivo está verde?</li>
+                            <li>Si está rojo, el problema es de comunicación general</li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>Verificar dirección del tag:</strong>
+                        <ul>
+                            <li>¿La dirección existe en el PLC?</li>
+                            <li>¿El formato es correcto? (D100, 40101, etc.)</li>
+                            <li>¿El tipo de dato coincide? (Word, Boolean, etc.)</li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>Probar con Quick Client:</strong>
+                        <ul>
+                            <li>Abrir Quick Client</li>
+                            <li>Agregar el tag problemático</li>
+                            <li>Observar valor y calidad (Quality)</li>
+                            <li>Calidad "Good" = comunicación OK</li>
+                            <li>Calidad "Bad" = problema de comunicación/dirección</li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>Revisar Event Log:</strong>
+                        <ul>
+                            <li>Buscar errores relacionados con el tag/dispositivo</li>
+                            <li>Mensajes comunes:
+                                <ul>
+                                    <li>"Timeout" - El dispositivo no responde</li>
+                                    <li>"Invalid address" - Dirección incorrecta</li>
+                                    <li>"Exception response" - Error en el dispositivo</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <li><strong>Verificar en el PLC:</strong>
+                        <ul>
+                            <li>Conectar al PLC con software de programación (WPLSoft)</li>
+                            <li>Verificar que la dirección exista</li>
+                            <li>Verificar que tenga un valor válido</li>
+                            <li>Verificar que no esté protegida contra escritura</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo de Lectura Exitosa en Quick Client:</h4>
+            <div class="code">
+KEPServerEX Quick Client
+========================
+
+Channel: Modbus_ASCII_RS485 [✓ Connected]
+└─ Device: PLC_Delta_01 [✓ Connected]
+   ├─ Tag: Sensor_Nivel_Alto
+   │  ├─ Address: X0
+   │  ├─ Value: TRUE
+   │  ├─ Quality: Good
+   │  └─ Timestamp: 2024-01-15 10:30:45.123
+   │
+   ├─ Tag: Temperatura_Tanque
+   │  ├─ Address: D100
+   │  ├─ Value: 45.5
+   │  ├─ Quality: Good
+   │  └─ Timestamp: 2024-01-15 10:30:45.456
+   │
+   ├─ Tag: Presion_Sistema
+   │  ├─ Address: D101
+   │  ├─ Value: 3.2
+   │  ├─ Quality: Good
+   │  └─ Timestamp: 2024-01-15 10:30:45.789
+   │
+   └─ Tag: Control_Bomba
+      ├─ Address: Y0
+      ├─ Value: FALSE
+      ├─ Quality: Good
+      ├─ Access: Read/Write
+      └─ Timestamp: 2024-01-15 10:30:46.012
+
+Statistics:
+- Scan Rate: 1000 ms
+- Total Tags: 4
+- Good Quality: 4/4 (100%)
+- Communication Errors: 0
+            </div>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Problemas Comunes y Soluciones:</h4>
+            <ul>
+                <li><strong>Tag siempre en 0:</strong> Verificar que el PLC esté escribiendo en esa dirección</li>
+                <li><strong>Calidad "Uncertain":</strong> El dispositivo responde pero con advertencias</li>
+                <li><strong>Valor parpadeante:</strong> Scan rate muy rápido o inestabilidad en la comunicación</li>
+                <li><strong>Timeout frecuente:</strong> Aumentar "Response Timeout" o verificar ruido en la línea</li>
+                <li><strong>Datos incorrectos:</strong> Verificar Byte Order (endianness) y tipo de dato</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 15: Introducción a InfeLink -->
+    <div class="slide" id="slide-15">
+        <h1>3. Software InfeLink - SCADA/HMI</h1>
+        
+        <div class="definition">
+            <h3>¿Qué es InfeLink?</h3>
+            <p><span class="highlight">InfeLink</span> es un software SCADA/HMI (Supervisory Control And Data Acquisition / Human Machine Interface) desarrollado para la creación de interfaces gráficas de supervisión y control industrial. Permite visualizar datos en tiempo real, crear alarmas, tendencias históricas y controlar procesos industriales.</p>
+        </div>
+
+        <div class="content">
+            <h3>Características Principales:</h3>
+            <ul>
+                <li><strong>Conectividad OPC:</strong> Se conecta a servidores OPC (KEPServerEX, Matrikon, etc.)</li>
+                <li><strong>Interfaz gráfica:</strong> Creación de pantallas HMI con objetos visuales</li>
+                <li><strong>Animaciones:</strong> Vinculación de objetos a tags para visualización dinámica</li>
+                <li><strong>Alarmas:</strong> Sistema de alarmas y eventos</li>
+                <li><strong>Tendencias:</strong> Gráficos históricos en tiempo real</li>
+                <li><strong>Reportes:</strong> Generación de reportes de producción</li>
+                <li><strong>Seguridad:</strong> Control de acceso por usuarios y permisos</li>
+            </ul>
+        </div>
+
+        <div class="image-container">
+            <img src="14.png" alt="Interfaz InfeLink" width="600" height="400">
+            <div class="image-caption">Figura 14: Interfaz principal de desarrollo en InfeLink</div>
+        </div>
+
+        <div class="content">
+            <h3>Arquitectura de InfeLink:</h3>
+            <div class="two-columns">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <h4>InfeLink Designer</h4>
+                    <ul>
+                        <li>Ambiente de desarrollo</li>
+                        <li>Creación de pantallas</li>
+                        <li>Configuración de tags</li>
+                        <li>Definición de animaciones</li>
+                        <li>Configuración de alarmas</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <h4>InfeLink Viewer/Runtime</h4>
+                    <ul>
+                        <li>Ejecución de pantallas</li>
+                        <li>Visualización en tiempo real</li>
+                        <li>Interacción con el operador</li>
+                        <li>Registro de datos</li>
+                        <li>Gestión de alarmas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 16: Creación de Botón (Sin ejemplo completo) -->
+    <div class="slide" id="slide-16">
+        <h1>3.1 Creación de Botón y Configuración de Animación</h1>
+        
+        <div class="procedure">
+            <h3>Procedimiento Paso a Paso:</h3>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Abrir InfeLink Designer</h4>
+                <ul>
+                    <li>Ejecutar InfeLink Designer</li>
+                    <li>Abrir proyecto existente o crear nuevo proyecto</li>
+                    <li>File → New Project (si es nuevo)</li>
+                    <li>Nombre del proyecto: "Proyecto_Tanque"</li>
+                    <li>Seleccionar carpeta de guardado</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Crear Nueva Pantalla</h4>
+                <ul>
+                    <li>Clic derecho en "Screens" → "New Screen"</li>
+                    <li>Nombre: "Pantalla_Principal"</li>
+                    <li>Tamaño: 1024×768 (o resolución deseada)</li>
+                    <li>Color de fondo: Seleccionar color claro (blanco o gris claro)</li>
+                </ul>
+                <div class="image-container">
+                    <img src="15.png" alt="Creación de pantalla" width="600" height="400">
+                    <div class="image-caption">Figura 15: Creación de nueva pantalla en InfeLink</div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Insertar Objeto Botón</h4>
+                <ul>
+                    <li>En la barra de herramientas, seleccionar "Objects" o "Toolbox"</li>
+                    <li>Buscar "Button" o "Push Button"</li>
+                    <li>Hacer clic y arrastrar en la pantalla para dibujar el botón</li>
+                    <li>Tamaño sugerido: 150×50 píxeles</li>
+                    <li>Posición: Coordenadas X=100, Y=100</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <h4>Configurar Apariencia del Botón</h4>
+                <div class="content">
+                    <p>Doble clic en el botón o clic derecho → "Properties":</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Propiedad</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Name</strong></td>
+                                <td>btn_Control_Bomba</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Caption/Text</strong></td>
+                                <td>CONTROL BOMBA</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Font</strong></td>
+                                <td>Arial, 12pt, Bold</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Background Color</strong></td>
+                                <td>Gray (estado normal)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Border Style</strong></td>
+                                <td>Sunken o Raised</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Border Color</strong></td>
+                                <td>Black</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-box">
+            <div class="step-number">5</div>
+            <h4>Configurar Animación del Botón</h4>
+            <div class="content">
+                <p>En Properties, buscar pestaña "Animations" o "Dinámica":</p>
+                
+                <h6>Animación de Color (Fill Color):</h6>
+                <ul>
+                    <li>Seleccionar "Fill Color" o "Background Color"</li>
+                    <li>Tipo de animación: "Tag Value" o "Expression"</li>
+                    <li>Tag: Seleccionar tag de KepServer
+                        <ul>
+                            <li>Navegar a: OPC Server → KEPServerEX → Channel1.Device1</li>
+                            <li>Seleccionar: <code>Control_Bomba</code> (Y0)</li>
+                        </ul>
+                    </li>
+                    <li>Configurar estados:
+                        <ul>
+                            <li><strong>Value = 0 (FALSE):</strong> Color Gray</li>
+                            <li><strong>Value = 1 (TRUE):</strong> Color Green</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h6>Animación de Texto (Caption):</h6>
+                <ul>
+                    <li>Seleccionar "Caption" o "Text"</li>
+                    <li>Tipo: "Tag Value"</li>
+                    <li>Tag: <code>Control_Bomba</code></li>
+                    <li>Configurar:
+                        <ul>
+                            <li><strong>Value = 0:</strong> Texto "BOMBA OFF"</li>
+                            <li><strong>Value = 1:</strong> Texto "BOMBA ON"</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step-box">
+            <div class="step-number">6</div>
+            <h4>Configurar Acción del Botón (Click)</h4>
+            <div class="content">
+                <p>Pestaña "Events" o "Actions":</p>
+                <ul>
+                    <li>Evento: "On Click" o "Mouse Click"</li>
+                    <li>Acción: "Write Tag Value" o "Toggle Tag"</li>
+                    <li>Tag a escribir: <code>Control_Bomba</code></li>
+                    <li>Tipo de acción:
+                        <ul>
+                            <li><strong>Toggle:</strong> Cambia de 0 a 1 o de 1 a 0</li>
+                            <li><strong>Set to 1:</strong> Siempre escribe 1 (ON)</li>
+                            <li><strong>Set to 0:</strong> Siempre escribe 0 (OFF)</li>
+                            <li><strong>Set Value:</strong> Valor específico</li>
+                        </ul>
+                    </li>
+                    <li>Recomendado: <strong>Toggle</strong> para control ON/OFF</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step-box">
+            <div class="step-number">7</div>
+            <h4>Configuración de Seguridad (Opcional)</h4>
+            <div class="content">
+                <ul>
+                    <li>Pestaña "Security" o "Permissions"</li>
+                    <li>Habilitar requerimiento de login</li>
+                    <li>Nivel de acceso requerido: "Operator" o "Engineer"</li>
+                    <li>Confirmación antes de ejecutar: Habilitar checkbox</li>
+                    <li>Mensaje de confirmación: "¿Desea cambiar el estado de la bomba?"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step-box">
+            <div class="step-number">8</div>
+            <h4>Guardar y Probar</h4>
+            <ul>
+                <li>File → Save o Ctrl+S</li>
+                <li>Clic en "Run" o "Simulation" (F5)</li>
+                <li>Probar el botón:
+                    <ul>
+                        <li>Hacer clic en el botón</li>
+                        <li>Verificar cambio de color (Gray → Green)</li>
+                        <li>Verificar cambio de texto ("OFF" → "ON")</li>
+                        <li>Verificar en Quick Client de KepServer que el tag cambió</li>
+                        <li>Verificar en el PLC que la salida Y0 cambió</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 17: Importar Tags desde KepServer -->
+    <div class="slide" id="slide-17">
+        <h1>3.2 Ingresar Grupo de Tags desde KepServer</h1>
+        
+        <div class="procedure">
+            <h3>Procedimiento de Importación:</h3>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <h4>Configurar Conexión OPC en InfeLink</h4>
+                <ul>
+                    <li>En InfeLink Designer, ir a "Tags" o "Variables"</li>
+                    <li>Clic derecho → "New Group" o "Add OPC Server"</li>
+                    <li>Nombre del grupo: "Tags_PLC_Tanque"</li>
+                </ul>
+                <div class="image-container">
+                    <img src="17.png" alt="Configuración OPC InfeLink" width="600" height="400">
+                    <div class="image-caption">Figura 17: Configuración de servidor OPC en InfeLink</div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <h4>Seleccionar Servidor OPC</h4>
+                <div class="content">
+                    <ul>
+                        <li>Tipo de servidor: "OPC DA" (Data Access)</li>
+                        <li>Seleccionar servidor: "Kepware.KEPServerEX.V6"</li>
+                        <li>Si no aparece:
+                            <ul>
+                                <li>Verificar que KEPServerEX esté ejecutándose</li>
+                                <li>Verificar que esté registrado como servidor OPC</li>
+                                <li>Tools → OPC Client en KepServer para probar</li>
+                            </ul>
+                        </li>
+                        <li>Computer: "Local" (si está en la misma PC) o IP remota</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <h4>Navegar por el Árbol de Tags</h4>
+                <div class="content">
+                    <p>Se mostrará el árbol de tags de KepServer:</p>
+                    <div class="code">
+└─ Kepware.KEPServerEX.V6
+   └─ [Channel1] Modbus_ASCII_RS485
+      └─ [Device1] PLC_Delta_01
+         ├─ Sensor_Nivel_Alto (Boolean)
+         ├─ Sensor_Nivel_Bajo (Boolean)
+         ├─ Control_Bomba (Boolean, R/W)
+         ├─ Temperatura_Tanque (Word)
+         ├─ Presion_Sistema (Word)
+         ├─ Setpoint_Temperatura (Word, R/W)
+         └─ Flow_Totalizer (Long)
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <h4>Importar Tags Individuales</h4>
+                <ul>
+                    <li>Expandir el árbol hasta ver los tags</li>
+                    <li>Seleccionar tags deseados (Ctrl+clic para múltiples)</li>
+                    <li>Clic derecho → "Add" o "Import"</li>
+                    <li>O arrastrar y soltar en el grupo de tags de InfeLink</li>
+                    <li>Los tags se agregan con el mismo nombre que en KepServer</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">5</div>
+                <h4>Importar Todo el Dispositivo (Bulk Import)</h4>
+                <ul>
+                    <li>Clic derecho en el dispositivo (PLC_Delta_01)</li>
+                    <li>Seleccionar "Import All Tags" o "Add All"</li>
+                    <li>Todos los tags configurados en KepServer se importan</li>
+                    <li>Se mantiene la estructura jerárquica</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">6</div>
+                <h4>Configurar Propiedades de Tags Importados</h4>
+                <div class="content">
+                    <p>Para cada tag importado, configurar:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Propiedad</th>
+                                <th>Configuración</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Scan Rate</strong></td>
+                                <td>1000 ms (o según requerimiento)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Deadband</strong></td>
+                                <td>0.1% (para evitar cambios mínimos)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alarm Enable</strong></td>
+                                <td>Sí/No según corresponda</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Logging Enable</strong></td>
+                                <td>Sí para tags históricos</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Description</strong></td>
+                                <td>Descripción en español</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-number">7</div>
+                <h4>Verificar Conexión y Calidad</h4>
+                <ul>
+                    <li>En la ventana de tags, verificar columna "Quality"</li>
+                    <li>Debe mostrar "Good" para todos los tags</li>
+                    <li>Si muestra "Bad":
+                        <ul>
+                            <li>Verificar que KepServer esté corriendo</li>
+                            <li>Verificar que el dispositivo esté conectado</li>
+                            <li>Revisar Event Log de InfeLink</li>
+                        </ul>
+                    </li>
+                    <li>Verificar valores actuales en columna "Value"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="example">
+            <h4>Ejemplo - Estructura de Tags Importados:</h4>
+            <div class="code">
+Grupo de Tags: Tags_PLC_Tanque
+├─ Conexión: OPC DA - Kepware.KEPServerEX.V6
+├─ Update Rate: 1000 ms
+└─ Tags:
+   │
+   ├─ Digitales (Boolean):
+   │  ├─ Sensor_Nivel_Alto
+   │  │  ├─ Address: X0
+   │  │  ├─ Quality: Good
+   │  │  ├─ Value: TRUE
+   │  │  └─ Timestamp: 2024-01-15 10:30:45
+   │  │
+   │  ├─ Sensor_Nivel_Bajo
+   │  │  ├─ Address: X1
+   │  │  ├─ Quality: Good
+   │  │  └─ Value: FALSE
+   │  │
+   │  └─ Control_Bomba
+   │     ├─ Address: Y0
+   │     ├─ Access: Read/Write
+   │     ├─ Quality: Good
+   │     └─ Value: FALSE
+   │
+   ├─ Analógicos (Word/Integer):
+   │  ├─ Temperatura_Tanque
+   │  │  ├─ Address: D100
+   │  │  ├─ Data Type: Word
+   │  │  ├─ Scaling: 0-1000 → 0.0-100.0
+   │  │  ├─ Quality: Good
+   │  │  ├─ Value: 45.5 °C
+   │  │  └─ Alarm: High @ 80.0 °C
+   │  │
+   │  ├─ Presion_Sistema
+   │  │  ├─ Address: D101
+   │  │  ├─ Data Type: Word
+   │  │  ├─ Scaling: 0-4095 → 0.0-10.0
+   │  │  ├─ Quality: Good
+   │  │  └─ Value: 3.2 bar
+   │  │
+   │  └─ Setpoint_Temperatura
+   │     ├─ Address: D200
+   │     ├─ Access: Read/Write
+   │     ├─ Quality: Good
+   │     └─ Value: 50.0 °C
+   │
+   └─ Totalizadores (Long):
+      └─ Flow_Totalizer
+         ├─ Address: D300
+         ├─ Data Type: Long (32-bit)
+         ├─ Quality: Good
+         └─ Value: 15234 litros
+
+Estadísticas del Grupo:
+- Total Tags: 7
+- Good Quality: 7/7 (100%)
+- Update Rate: 1000 ms
+- Last Update: 2024-01-15 10:30:45
+- Communication Errors: 0
+            </div>
+        </div>
+
+        <div class="content">
+            <h3>Uso de Tags en Objetos Gráficos:</h3>
+            <p>Una vez importados los tags, se pueden vincular a objetos:</p>
+            
+            <h4>Ejemplo - Crear Indicador de Temperatura:</h4>
+            <ol>
+                <li>Insertar objeto "Numeric Display" o "Text"</li>
+                <li>En Properties → Animation → Value</li>
+                <li>Seleccionar tag: <code>Tags_PLC_Tanque.Temperatura_Tanque</code></li>
+                <li>Configurar formato: "0.0" (un decimal)</li>
+                <li>Agregar unidad: "°C"</li>
+                <li>El display mostrará el valor en tiempo real</li>
+            </ol>
+
+            <h4>Ejemplo - Crear Barra de Nivel:</h4>
+            <ol>
+                <li>Insertar objeto "Bar Graph" o "Progress Bar"</li>
+                <li>Animation → Fill/Value</li>
+                <li>Tag: <code>Tags_PLC_Tanque.Presion_Sistema</code></li>
+                <li>Range: Min=0.0, Max=10.0</li>
+                <li>Color: Verde (0-5), Amarillo (5-8), Rojo (8-10)</li>
+            </ol>
+        </div>
+
+        <div class="image-container">
+            <img src="18.png" alt="Tags importados en InfeLink" width="600" height="400">
+            <div class="image-caption">Figura 18: Ventana de tags mostrando tags importados desde KepServer</div>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Consideraciones Importantes:</h4>
+            <ul>
+                <li><strong>Sincronización:</strong> Los tags deben tener el mismo nombre o ser mapeados correctamente</li>
+                <li><strong>Tipos de dato:</strong> Verificar que el tipo de dato en InfeLink coincida con KepServer</li>
+                <li><strong>Permisos:</strong> Asegurar que InfeLink tenga permisos para leer/escribir en OPC</li>
+                <li><strong>Rendimiento:</strong> No importar tags innecesarios (afecta el rendimiento)</li>
+                <li><strong>Actualización:</strong> Si se agregan tags en KepServer, deben importarse nuevamente en InfeLink</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 18: Ejemplo Integrador -->
+    <div class="slide" id="slide-18">
+        <h1>Ejemplo Integrador - Sistema Completo</h1>
+        
+        <div class="content">
+            <h3>Caso Práctico: Control de Tanque de Agua</h3>
+            <p>Sistema de bombeo con las siguientes características:</p>
+            <ul>
+                <li>Tanque de almacenamiento de agua</li>
+                <li>Bomba controlada por PLC Delta</li>
+                <li>Sensores de nivel (alto/bajo)</li>
+                <li>Sensor de temperatura</li>
+                <li>Supervisión vía SCADA InfeLink</li>
+            </ul>
+        </div>
+
+        <div class="image-container">
+            <img src="19.png" alt="Diagrama del sistema" width="600" height="400">
+            <div class="image-caption">Figura 19: Diagrama del sistema de control de tanque</div>
+        </div>
+
+        <div class="content">
+            <h3>Configuración Completa:</h3>
+            
+            <h4>1. Hardware:</h4>
+            <ul>
+                <li>PLC Delta DVP-14SS2</li>
+                <li>Módulo RS485 integrado</li>
+                <li>Entradas: X0 (Nivel Alto), X1 (Nivel Bajo), X2 (Temp Sensor)</li>
+                <li>Salidas: Y0 (Bomba), Y1 (Alarma)</li>
+                <li>Registros: D100 (Temperatura), D101 (Setpoint)</li>
+            </ul>
+
+            <h4>2. KepServerEX:</h4>
+            <div class="code">
+Channel: Modbus_ASCII_Tanque
+├─ Port: COM3
+├─ Baud: 9600-7-E-1 (Ejemplo ASCII)
+└─ Device: PLC_Tanque_Agua
+   ├─ ID: 1
+   └─ Tags:
+      ├─ Sensor_Nivel_Alto (X0, Boolean)
+      ├─ Sensor_Nivel_Bajo (X1, Boolean)
+      ├─ Control_Bomba (Y0, Boolean, R/W)
+      ├─ Alarma (Y1, Boolean, R/W)
+      ├─ Temperatura (D100, Word, 0-1000→0-100°C)
+      └─ Setpoint_Temp (D101, Word, R/W)
+            </div>
+
+            <h4>3. InfeLink - Pantalla Principal:</h4>
+            <ul>
+                <li><strong>Botón:</strong> Control manual de bomba (Toggle Y0)</li>
+                <li><strong>Indicador:</strong> Display numérico de temperatura</li>
+                <li><strong>Barras:</strong> Indicadores de nivel (X0, X1)</li>
+                <li><strong>Alarma:</strong> Indicador visual/sonoro cuando Y1=1</li>
+                <li><strong>Input:</strong> Campo para modificar setpoint (D101)</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <h4>Lógica de Control Automático (en PLC):</h4>
+            <div class="code">
+Programa en escalera (Ladder) para Delta PLC:
+
+Rung 1 - Encendido automático por nivel bajo:
+|--[X1]--------[Y0]----(Y0)----|
+   Nivel Bajo   Bomba    Bomba
+   (Normally    (Seal)   (Coil)
+   Open)
+
+Rung 2 - Apagado por nivel alto:
+|--[/X0]-----------------------|
+   Nivel Alto
+   (Normally Closed)
+
+Rung 3 - Alarma por temperatura alta:
+|--[D100>D101]----(Y1)----|
+   Temp > Setpoint  Alarma
+
+Rung 4 - Lectura de temperatura:
+(Leer sensor analógico y escalar a D100)
+
+Operación:
+- Cuando el nivel baja (X1=1), la bomba arranca (Y0=1)
+- La bomba se mantiene encendida (self-holding)
+- Cuando el nivel alto se activa (X0=1), la bomba se detiene
+- Si la temperatura excede el setpoint, se activa alarma (Y1=1)
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="20.png" alt="Pantalla SCADA final" width="600" height="400">
+            <div class="image-caption">Figura 20: Pantalla SCADA completa en InfeLink</div>
+        </div>
+
+        <div class="content">
+            <h3>Flujo de Datos Completo:</h3>
+            <ol>
+                <li><strong>PLC → KepServer:</strong> 
+                    <ul>
+                        <li>KepServer lee tags cada 1000 ms vía Modbus ASCII</li>
+                        <li>Direcciones: X0, X1, Y0, D100, etc.</li>
+                    </ul>
+                </li>
+                <li><strong>KepServer → OPC:</strong>
+                    <ul>
+                        <li>Traduce datos Modbus a formato OPC DA</li>
+                        <li>Mantiene calidad y timestamp</li>
+                    </ul>
+                </li>
+                <li><strong>OPC → InfeLink:</strong>
+                    <ul>
+                        <li>InfeLink se suscribe a tags OPC</li>
+                        <li>Recibe actualizaciones en tiempo real</li>
+                    </ul>
+                </li>
+                <li><strong>InfeLink → Operador:</strong>
+                    <ul>
+                        <li>Muestra datos en pantalla HMI</li>
+                        <li>Actualiza animaciones (colores, valores)</li>
+                        <li>Genera alarmas si corresponde</li>
+                    </ul>
+                </li>
+                <li><strong>Operador → InfeLink:</strong>
+                    <ul>
+                        <li>Operador hace clic en botón</li>
+                        <li>InfeLink escribe en tag OPC</li>
+                    </ul>
+                </li>
+                <li><strong>InfeLink → KepServer → PLC:</strong>
+                    <ul>
+                        <li>KepServer recibe escritura OPC</li>
+                        <li>Envía comando Modbus Write al PLC</li>
+                        <li>PLC actualiza salida Y0</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Slide 19: Resumen y Mejores Prácticas -->
+    <div class="slide" id="slide-19">
+        <h1>Resumen y Mejores Prácticas</h1>
+        
+        <div class="content">
+            <h3>Puntos Clave del Curso:</h3>
+            
+            <h4>1. Protocolo Modbus:</h4>
+            <ul>
+                <li>Protocolo estándar industrial maestro-esclavo</li>
+                <li>Dos formatos: ASCII (texto, fácil depuración) y RTU (binario, eficiente)</li>
+                <li>RS485: medio físico común (diferencial, multipunto, 1200m)</li>
+                <li>TCP/IP: versión Ethernet (más rápida, sin límite de distancia)</li>
+                <li>Funciones principales: 01-02 (lectura bits), 03-04 (lectura registros), 05-06 (escritura)</li>
+            </ul>
+
+            <h4>2. KepServerEX:</h4>
+            <ul>
+                <li>Servidor OPC que traduce protocolos industriales</li>
+                <li>Jerarquía: Channel → Device → Tag</li>
+                <li>Configuración serial: puerto, baud rate, paridad (importante en ASCII)</li>
+                <li>Delta PLC: mapeo específico de direcciones (X, Y, M, D, T, C)</li>
+                <li>Verificación: Quick Client, Diagnostics, Event Log</li>
+            </ul>
+
+            <h4>3. InfeLink SCADA:</h4>
+            <ul>
+                <li>Interfaz HMI para visualización y control</li>
+                <li>Conexión vía OPC DA a KepServer</li>
+                <li>Objetos animados vinculados a tags</li>
+                <li>Botones con acciones de escritura</li>
+                <li>Importación masiva de tags desde KepServer</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <h3>Mejores Prácticas:</h3>
+            
+            <div class="procedure">
+                <h4>Configuración de Comunicación:</h4>
+                <ul>
+                    <li>✓ Usar Modbus RTU para rendimiento, ASCII para depuración</li>
+                    <li>✓ Baud rate: 9600 o 19200 (balance velocidad/confiabilidad)</li>
+                    <li>✓ Cable blindado par trenzado para RS485</li>
+                    <li>✓ Terminación de 120Ω en extremos del bus</li>
+                    <li>✓ Direcciones Modbus únicas (1-247)</li>
+                    <li>✓ Response timeout adecuado (1000-3000 ms)</li>
+                </ul>
+            </div>
+
+            <div class="procedure">
+                <h4>KepServerEX:</h4>
+                <ul>
+                    <li>✓ Nombres descriptivos para channels, devices, tags</li>
+                    <li>✓ Habilitar diagnostics para troubleshooting</li>
+                    <li>✓ Configurar scan rate apropiado (no más rápido de lo necesario)</li>
+                    <li>✓ Usar scaling en tags analógicos</li>
+                    <li>✓ Documentar direcciones y propósito de cada tag</li>
+                    <li>✓ Backup regular de configuración (.kek file)</li>
+                </ul>
+            </div>
+
+            <div class="procedure">
+                <h4>InfeLink:</h4>
+                <ul>
+                    <li>✓ Diseño de pantalla intuitivo y claro</li>
+                    <li>✓ Colores estándar (verde=OK, rojo=alarma, amarillo=advertencia)</li>
+                    <li>✓ Confirmación en botones críticos</li>
+                    <li>✓ Niveles de acceso por usuario</li>
+                    <li>✓ Logging de alarmas y eventos</li>
+                    <li>✓ Pruebas exhaustivas antes de producción</li>
+                </ul>
+            </div>
+
+            <div class="procedure">
+                <h4>Seguridad:</h4>
+                <ul>
+                    <li>✓ Proteger escrituras críticas con confirmación</li>
+                    <li>✓ Usar passwords en niveles de acceso</li>
+                    <li>✓ Auditoría de cambios importantes</li>
+                    <li>✓ Backup de configuración y datos históricos</li>
+                    <li>✓ Documentación actualizada del sistema</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="warning">
+            <h4>Errores Comunes a Evitar:</h4>
+            <ul>
+                <li>✗ Mezclar baud rates diferentes en el mismo bus RS485</li>
+                <li>✗ Olvidar terminación en RS485 (causa reflexiones)</li>
+                <li>✗ Direcciones Modbus duplicadas</li>
+                <li>✗ Scan rate demasiado rápido (satura la comunicación)</li>
+                <li>✗ No verificar calidad de tags ("Bad" quality)</li>
+                <li>✗ Olvidar configurar byte order (endianness)</li>
+                <li>✗ No probar escrituras antes de poner en producción</li>
+                <li>✗ Falta de documentación del sistema</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <h3>Recursos Adicionales:</h3>
+            <ul>
+                <li><strong>Documentación Modbus:</strong> www.modbus.org</li>
+                <li><strong>Kepware Documentation:</strong> Documentación oficial de KEPServerEX</li>
+                <li><strong>Delta PLC Manual:</strong> Manual de programación y comunicación DVP series</li>
+                <li><strong>InfeLink Help:</strong> Ayuda integrada y manuales del software</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 20: Preguntas y Cierre -->
+    <div class="slide" id="slide-20">
+        <h1>¡Gracias por su Atención!</h1>
+        
+        <div class="content" style="text-align: center; padding: 50px;">
+            <h2 style="border: none;">¿Preguntas?</h2>
+            
+            <div class="image-container">
+                <img src="21.png" alt="Imagen de cierre" width="600" height="400">
+                <div class="image-caption">Figura 21: Arquitectura completa del sistema</div>
+            </div>
+
+            <div class="example" style="margin-top: 30px;">
+                <h3>Resumen del Flujo Completo:</h3>
+                <div class="code">
+┌─────────────────┐     Modbus ASCII   ┌─────────────────┐
+│   PLC Delta     │◄──────────────────►│  KepServerEX    │
+│                 │      RS485         │    (OPC Server) │
+│  - Entradas X   │                    │                 │
+│  - Salidas Y    │                    │  - Channel      │
+│  - Registros D  │                    │  - Device       │
+└─────────────────┘                    │  - Tags         │
+                                       └────────┬────────┘
+                                                │
+                                                │ OPC DA
+                                                │
+                                       ┌────────▼────────┐
+                                       │   InfeLink      │
+                                       │   (SCADA/HMI)   │
+                                       │                 │
+                                       │  - Pantallas    │
+                                       │  - Animaciones  │
+                                       │  - Alarmas      │
+                                       │  - Tendencias   │
+                                       └─────────────────┘
+                </div>
+            </div>
+
+            <div class="content" style="margin-top: 30px;">
+                <h3>Temas Vistos:</h3>
+                <div class="two-columns">
+                    <div>
+                        <h4>Protocolo Modbus</h4>
+                        <ul style="text-align: left;">
+                            <li>Definición y características</li>
+                            <li>Datagrama ASCII</li>
+                            <li>Datagrama RTU</li>
+                            <li>Modbus sobre RS485</li>
+                            <li>Modbus sobre TCP/IP</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>KepServerEX</h4>
+                        <ul style="text-align: left;">
+                            <li>Concepto OPC Server</li>
+                            <li>Creación de canal serial (ASCII)</li>
+                            <li>Creación de dispositivo</li>
+                            <li>Tags en Delta PLC</li>
+                            <li>Verificación de estado</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>InfeLink SCADA</h4>
+                    <ul style="text-align: left;">
+                        <li>Creación de botones</li>
+                        <li>Configuración de animaciones</li>
+                        <li>Importación de tags desde KepServer</li>
+                        <li>Ejemplo integrador completo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="procedure" style="margin-top: 30px;">
+                <h3>Próximos Pasos:</h3>
+                <ol>
+                    <li>Practicar configuración en equipos reales</li>
+                    <li>Experimentar con diferentes tipos de animaciones</li>
+                    <li>Explorar alarmas y tendencias históricas</li>
+                    <li>Implementar seguridad y usuarios</li>
+                    <li>Desarrollar proyectos propios</li>
+                </ol>
+            </div>
+
+            <p style="margin-top: 40px; font-size: 1.2em; color: #2c3e50;">
+                <strong>¡Éxito en sus proyectos de automatización!</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="slide-counter">
+        Diapositiva <span id="current-slide">1</span> de <span id="total-slides">20</span>
+    </div>
+
+    <div class="navigation">
+        <button class="btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Anterior</button>
+        <button class="btn" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 20;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+            
+            document.getElementById('current-slide').textContent = currentSlide;
+            document.getElementById('total-slides').textContent = totalSlides;
+            
+            // Actualizar botones
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').textContent = 
+                currentSlide === totalSlides ? 'Reiniciar ↺' : 'Siguiente →';
+            
+            // Scroll al inicio
+            window.scrollTo(0, 0);
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        // Inicializar
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
